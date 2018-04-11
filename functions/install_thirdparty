@@ -31,6 +31,7 @@ function install_thirdparty {
 		--cancel-button "Go Back" \
 		$LINES $COLUMNS $(( $LINES - 12 )) \
 		'install_chrome'		'Google Chrome' \
+		'install_gcsdk'         'Google Cloud SDK' \
 		'install_dropbox'		'Dropbox' \
 		'install_oracle_java'	'Oracle Java' \
 		'install_rvm'			'Ruby Version Manager (RVM)' \

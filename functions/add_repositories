@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Add RPM Fusion
-function add_rpmfusion() {
+function add_rpmfusion_repo() {
 	echo_message header "Starting 'add_rpmfusion' function"
 	# Check if valid RPM Fusion repository
 	if [[ "$1" = "free" ]] || [[ "$1" = "nonfree" ]] ; then
@@ -45,6 +45,42 @@ function add_flatpak_repo() {
 	fi
 }
 
+# Add Google Cloud SDK
+function add_googlecloudsdk_repo() {
+	echo_message header "Starting 'add_cloudsdk' function"
+	# Check if valid Google Cloud SDK repository
+	if [[ "$1" = "" ]] ; then
+		# Check if already present
+		if [ -e /etc/yum.repos.d/google-cloud-sdk.repo ]; then
+			echo_message info "Google Cloud SDK repository already added."
+			whiptail --msgbox "The Google Cloud SDK repository is already added." 8 56
+			$2
+		else
+			# Add repository
+			echo_message info "Downloading Google Cloud SDK repository package..."
+			elevate_privilege "`sudo tee -a /etc/yum.repos.d/google-cloud-sdk.repo << EOM
+[google-cloud-sdk]
+name=Google Cloud SDK
+baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+       https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOM`"
+			# Finished
+			echo_message success "Google Cloud SDK repository has been added."
+			whiptail --title "Finished" --msgbox "Google Cloud SDK repository has been added." 8 56
+			$2
+		fi
+	else
+		# If there is an error
+		echo_message error "Not a valid Google Cloud SDK repository. Aborting..."
+		whiptail --msgbox "Not a valid Google Cloud SDK repository. Sorry, try again." --title "Oops" 8 56
+		$2
+	fi
+}
+
 # Add Repositories
 function add_repositories {
 	echo_message header "Starting 'add_repositories' function"
@@ -61,6 +97,7 @@ function add_repositories {
 		"rpmfusion_free"		"RPM Fusion (Free)" \
 		"rpmfusion_nonfree"		"RPM Fusion (Non-free)" \
 		"add_flathub"			"FlatHub" \
+		"add_googlecloud"		"GoogleCloudSDK" \
 		3>&1 1>&2 2>&3)
 	# check exit status
 	while [ $? -eq 0 ]; do
@@ -78,6 +115,11 @@ function add_repositories {
 			REPONAME="flathub"
 			REPO="https://dl.flathub.org/repo/flathub.flatpakrepo"
 			add_flatpak_repo $REPONAME $REPO
+			add_repositories
+		;;
+		# Google Cloud SDK
+		add_googlecloud)
+			add_googlecloudsdk_repo
 			add_repositories
 		;;
 		# Go Back
