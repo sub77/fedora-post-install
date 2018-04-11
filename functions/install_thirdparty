@@ -39,6 +39,7 @@ function install_thirdparty {
 		'install_spotify'		'Spotify' \
 		'install_sublime_text'	'Sublime Text 3' \
 		'install_vlc'			'VLC Media Player' \
+		'install_windscribe'	'Windscribe' \
 		3>&1 1>&2 2>&3)
 
 	# check exit status

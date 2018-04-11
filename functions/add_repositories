@@ -81,6 +81,33 @@ EOM`"
 	fi
 }
 
+# Add Windscribe
+function add_windscribe_repo() {
+	echo_message header "Starting 'add_windscribe_repo' function"
+	# Check if valid Windscribe repository
+	if [[ "$1" = "" ]] ; then
+		# Check if already present
+		if [ -e /etc/yum.repos.d/windscribe.repo ]; then
+			echo_message info "Windscribe repository already added."
+			whiptail --msgbox "The Windscribe repository is already added." 8 56
+			$2
+		else
+			# Add repository
+			echo_message info "Downloading Windscribe repository package..."
+			elevate_privilege "wget https://repo.windscribe.com/fedora/windscribe.repo -O /etc/yum.repos.d/windscribe.repo"
+			# Finished
+			echo_message success "Windscribe repository has been added."
+			whiptail --title "Finished" --msgbox "Windscribe repository has been added." 8 56
+			$2
+		fi
+	else
+		# If there is an error
+		echo_message error "Not a valid Windscribe repository. Aborting..."
+		whiptail --msgbox "Not a valid Windscribe repository. Sorry, try again." --title "Oops" 8 56
+		$2
+	fi
+}
+
 # Add Repositories
 function add_repositories {
 	echo_message header "Starting 'add_repositories' function"
@@ -98,6 +125,7 @@ function add_repositories {
 		"rpmfusion_nonfree"		"RPM Fusion (Non-free)" \
 		"add_flathub"			"FlatHub" \
 		"add_googlecloud"		"GoogleCloudSDK" \
+		"add_windscribe"		"Windscribe" \
 		3>&1 1>&2 2>&3)
 	# check exit status
 	while [ $? -eq 0 ]; do
@@ -120,6 +148,13 @@ function add_repositories {
 		# Google Cloud SDK
 		add_googlecloud)
 			add_googlecloudsdk_repo
+			add_repositories
+		;;
+		# Windscribe
+		add_windscribe)
+			REPONAME="windscribe"
+			REPO="https://repo.windscribe.com/fedora/windscribe.repo"
+			add_windscribe_repo $REPONAME $REPO
 			add_repositories
 		;;
 		# Go Back

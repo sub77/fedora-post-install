@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Install windscribe
+function install_windscribe {
+	# Variables
+	PACKAGE=windscribe-cli
+	NAME="Windscribe"
+	echo_message title "Starting $NAME installation..."
+	# Check if package is installed
+	if [ $(check_packages $PACKAGE; echo $?) = 1 ]; then
+		echo_message info "$NAME is not installed."
+		# Add repository in this case Windscribe
+		REPONAME="Windscribe"
+		if (eval `resize` && whiptail \
+			--title "Add $REPONAME Repository?" \
+			--yesno "The $REPONAME repository is required to install $NAME.\n\nProceed with installation?" \
+			10 60) then
+			add_windscribe_repo
+		else
+			# Cancelled
+			echo_message error "$REPONAME is required for $NAME installation. Aborting..."
+			install_thirdparty
+		fi
+		# Install package(s)
+		echo_message info "Installing '$PACKAGE'..."
+		elevate_privilege "dnf install -y $PACKAGE"
+		# Finished
+		echo_message success "Installation of '$PACKAGE' complete."
+		whiptail --title "Finished" --msgbox "Installation of $NAME complete." 8 56
+		install_thirdparty
+	else
+		# Already installed
+		echo_message success "$NAME already installed."
+		whiptail --title "Finished" --msgbox "$NAME is already installed." 8 56
+		install_thirdparty
+	fi
+}
